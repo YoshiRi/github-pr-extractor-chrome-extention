@@ -1,43 +1,69 @@
 # GitHub PR Extractor
 
-Chrome 拡張として動作し、GitHub の Pull Request ページから以下を抽出してクリップボードへコピーします。
+Chrome extension to extract Pull Request data from GitHub and copy it to clipboard using a customizable template.
 
-- PR の Description (`body`)
-- PR の差分 (`.patch` 形式)
+## Features
 
-## Files
+- Adds an `Extract PR` button on GitHub PR pages.
+- Fetches PR metadata from GitHub API:
+  - `title`
+  - `body` (description)
+  - `.patch` diff
+- Applies a user-defined template before copying.
+- Uses toast notifications instead of blocking alerts.
 
-- `manifest.json`: 拡張機能の設定 (Manifest V3)
-- `content.js`: PR ページに `Extract PR` ボタンを表示し、抽出処理をトリガー
-- `background.js`: GitHub API から PR 情報と patch を取得
+## Project Structure
 
-## 使い方 (ローカル読み込み)
+- `manifest.json`: Extension configuration (Manifest V3)
+- `content.js`: Injects the button on PR pages, builds final output, copies to clipboard
+- `background.js`: Handles API calls and returns PR data
+- `popup.html`: Settings UI
+- `popup.js`: Template editor logic (save/load via `chrome.storage.sync`)
 
-1. Chrome で `chrome://extensions` を開く
-2. 右上の「デベロッパー モード」を ON
-3. 「パッケージ化されていない拡張機能を読み込む」でこのディレクトリを選択
-4. GitHub の PR ページ (`https://github.com/<owner>/<repo>/pull/<number>`) を開く
-5. 右上付近に表示される `Extract PR` ボタンを押す
-6. クリップボードに出力されるテキストを貼り付けて利用
+## Setup (Load Unpacked)
 
-## 出力イメージ
+1. Open `chrome://extensions`
+2. Enable `Developer mode`
+3. Click `Load unpacked`
+4. Select this directory (`github-pr-extractor`)
+
+## Usage
+
+1. Open any GitHub PR page: `https://github.com/<owner>/<repo>/pull/<number>`
+2. (Optional) Click the extension icon and edit/save your template
+3. Click `Extract PR` on the page
+4. Paste clipboard content anywhere you want (ChatGPT, docs, notes, etc.)
+
+## Template Variables
+
+- `{{title}}`: PR title
+- `{{body}}`: PR description/body
+- `{{diff}}`: PR patch text
+
+Example:
 
 ```text
-===== PR DESCRIPTION =====
-<PR本文>
+## Title
+{{title}}
 
-===== DIFF (.patch) =====
-<patch本文>
+## Description
+{{body}}
+
+## Patch
+{{diff}}
 ```
 
-## 注意点
+## Permissions
 
-- 現状は公開リポジトリ想定です。
-- private repo で使う場合は `background.js` の `Authorization` ヘッダー対応が必要です。
-- GitHub API のレート制限に注意してください。
+- `storage`: Save custom template
+- `clipboardWrite`: Copy extracted result
+- `activeTab`, `scripting`: Run on current GitHub PR tab
+- Host permissions:
+  - `https://github.com/*`
+  - `https://api.github.com/*`
 
-## 今後の改善案
+## Notes
 
-- 認証トークン入力 UI の追加
-- 出力フォーマット (JSON/Markdown) の切り替え
-- コピーだけでなくファイル保存にも対応
+- Currently designed for public repositories.
+- For private repositories, add an `Authorization` header in `background.js`.
+- GitHub API rate limits apply.
