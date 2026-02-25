@@ -1,3 +1,34 @@
+function showToast(message) {
+  const toast = document.createElement("div");
+  toast.innerText = message;
+
+  Object.assign(toast.style, {
+    position: "fixed",
+    top: "20px",
+    right: "20px",
+    background: "#2da44e",
+    color: "white",
+    padding: "10px 14px",
+    borderRadius: "8px",
+    fontSize: "14px",
+    zIndex: 10000,
+    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+    opacity: "0",
+    transition: "opacity 0.3s"
+  });
+
+  document.body.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    toast.style.opacity = "1";
+  });
+
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    setTimeout(() => toast.remove(), 300);
+  }, 1200);
+}
+
 (function () {
   const btn = document.createElement("button");
   btn.innerText = "Extract PR";
@@ -15,7 +46,7 @@
   btn.onclick = () => {
     chrome.runtime.sendMessage({ type: "EXTRACT_PR" }, (response) => {
       if (!response || response.error) {
-        alert("Error extracting PR");
+        showToast("Error extracting PR");
         console.error(response?.error);
         return;
       }
@@ -39,10 +70,10 @@
 
         try {
           await navigator.clipboard.writeText(output);
-          alert("PR data copied using template!");
+          showToast("PR data copied using template!");
         } catch (e) {
           console.error("Clipboard error:", e);
-          alert("Failed to copy to clipboard");
+          showToast("Failed to copy to clipboard");
         }
       });
     });
