@@ -1,0 +1,9 @@
+Just run following command and upload to google dev console.
+
+zip -r github-pr-extractor.zip \
+  manifest.json \
+  content.js \
+  background.js \
+  popup.html \
+  popup.js \
+  icons/
