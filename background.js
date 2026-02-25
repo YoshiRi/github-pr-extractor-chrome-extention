@@ -27,6 +27,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       const patchText = await patchRes.text();
 
       sendResponse({
+        title: prData.title,
         description: prData.body || "",
         diff: patchText
       });

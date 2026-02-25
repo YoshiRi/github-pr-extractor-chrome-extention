@@ -13,23 +13,38 @@
   btn.style.cursor = "pointer";
 
   btn.onclick = () => {
-    chrome.runtime.sendMessage({ type: "EXTRACT_PR" }, async (response) => {
+    chrome.runtime.sendMessage({ type: "EXTRACT_PR" }, (response) => {
       if (!response || response.error) {
         alert("Error extracting PR");
         console.error(response?.error);
         return;
       }
 
-      const output = `
-===== PR DESCRIPTION =====
-${response.description}
+      chrome.storage.sync.get(["template"], async (data) => {
+        const template =
+          data.template ||
+`## Title
+{{title}}
 
-===== DIFF (.patch) =====
-${response.diff}
-`;
+## Description
+{{body}}
 
-      await navigator.clipboard.writeText(output);
-      alert("PR data copied to clipboard!");
+## Patch
+{{diff}}`;
+
+        const output = template
+          .replaceAll("{{title}}", response.title || "")
+          .replaceAll("{{body}}", response.description || "")
+          .replaceAll("{{diff}}", response.diff || "");
+
+        try {
+          await navigator.clipboard.writeText(output);
+          alert("PR data copied using template!");
+        } catch (e) {
+          console.error("Clipboard error:", e);
+          alert("Failed to copy to clipboard");
+        }
+      });
     });
   };
 
